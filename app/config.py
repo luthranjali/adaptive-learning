@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     debug: bool = False
     
     # Database
-    database_url: str = "postgresql://user:password@localhost/adaptive_learning"
+    database_url: str = "sqlite:///./adaptive_learning.db"
     redis_url: str = "redis://localhost:6379"
     
     # Security

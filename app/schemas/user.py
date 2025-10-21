@@ -42,3 +42,9 @@ class UserUpdate(BaseModel):
     grade_level: Optional[str] = None
     learning_goals: Optional[str] = None
     preferred_learning_style: Optional[str] = None
+
+
+class Token(BaseModel):
+    """Schema for authentication token."""
+    access_token: str
+    token_type: str

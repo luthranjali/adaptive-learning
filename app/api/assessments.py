@@ -43,7 +43,7 @@ async def create_assessment(
     db.commit()
     db.refresh(assessment)
     
-    return AssessmentResponse.from_orm(assessment)
+    return AssessmentResponse.model_validate(assessment)
 
 
 @router.get("/", response_model=List[AssessmentResponse])
@@ -64,7 +64,7 @@ async def get_assessments(
         query = query.filter(Assessment.difficulty_level == difficulty_level)
     
     assessments = query.all()
-    return [AssessmentResponse.from_orm(assessment) for assessment in assessments]
+    return [AssessmentResponse.model_validate(assessment) for assessment in assessments]
 
 
 @router.get("/{assessment_id}", response_model=AssessmentResponse)
@@ -77,7 +77,7 @@ async def get_assessment(assessment_id: int, db: Session = Depends(get_db)):
             detail="Assessment not found"
         )
     
-    return AssessmentResponse.from_orm(assessment)
+    return AssessmentResponse.model_validate(assessment)
 
 
 @router.post("/start", response_model=AssessmentSessionResponse)
@@ -119,7 +119,7 @@ async def start_assessment(
     db.commit()
     db.refresh(session)
     
-    return AssessmentSessionResponse.from_orm(session)
+    return AssessmentSessionResponse.model_validate(session)
 
 
 @router.get("/sessions/{session_id}", response_model=AssessmentSessionResponse)
@@ -140,7 +140,7 @@ async def get_session(
             detail="Session not found"
         )
     
-    return AssessmentSessionResponse.from_orm(session)
+    return AssessmentSessionResponse.model_validate(session)
 
 
 @router.get("/sessions/{session_id}/next-question")
@@ -232,7 +232,7 @@ async def submit_answer(
     ml_service = MLService()
     await ml_service.update_with_response(session, response, db)
     
-    return QuestionResponseResponse.from_orm(response)
+    return QuestionResponseResponse.model_validate(response)
 
 
 @router.post("/sessions/{session_id}/complete", response_model=AssessmentResult)
@@ -302,7 +302,7 @@ async def get_user_sessions(
         AssessmentSession.user_id == current_user.id
     ).order_by(AssessmentSession.started_at.desc()).all()
     
-    return [AssessmentSessionResponse.from_orm(session) for session in sessions]
+    return [AssessmentSessionResponse.model_validate(session) for session in sessions]
 
 
 @router.get("/sessions/{session_id}/results", response_model=AssessmentResult)

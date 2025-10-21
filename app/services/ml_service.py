@@ -7,7 +7,7 @@ from datetime import datetime
 import asyncio
 
 from app.models.assessment import AssessmentSession
-from app.models.question import Question, QuestionResponse
+from app.models.question import Question, QuestionResponse, QuestionBank
 from app.ml.models import (
     IRTModel, BKTModel, LevelRecommender, 
     QuestionSelector, GapDetector, PerformanceAnalyzer

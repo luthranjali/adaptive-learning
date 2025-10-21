@@ -79,7 +79,7 @@ class Question(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Additional question data
-    metadata = Column(JSON, nullable=True)
+    question_metadata = Column(JSON, nullable=True)
     
     # Relationships
     question_bank = relationship("QuestionBank", back_populates="questions")

@@ -15,8 +15,8 @@ from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing - using pbkdf2_sha256 to avoid bcrypt version issues
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
@@ -43,9 +43,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
-    """Authenticate user with email and password."""
-    user = db.query(User).filter(User.email == email).first()
+def authenticate_user(db: Session, username_or_email: str, password: str) -> Optional[User]:
+    """Authenticate user with username/email and password."""
+    # Try to find user by email first, then by username
+    user = db.query(User).filter(User.email == username_or_email).first()
+    if not user:
+        user = db.query(User).filter(User.username == username_or_email).first()
+    
     if not user:
         return None
     if not verify_password(password, user.hashed_password):
@@ -104,7 +108,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     
-    return UserResponse.from_orm(db_user)
+    return UserResponse.model_validate(db_user)
 
 
 @router.post("/login", response_model=Token)
@@ -139,7 +143,7 @@ async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Sessi
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """Get current user information."""
-    return UserResponse.from_orm(current_user)
+    return UserResponse.model_validate(current_user)
 
 
 @router.put("/me", response_model=UserResponse)
@@ -160,4 +164,4 @@ async def update_current_user(
     db.commit()
     db.refresh(current_user)
     
-    return UserResponse.from_orm(current_user)
+    return UserResponse.model_validate(current_user)
